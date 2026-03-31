@@ -2,10 +2,6 @@ const gameBoard = (() => {
     board = [[[" "], [" "], [" "]], [[" "], [" "], [" "]], [[" "], [" "], [" "]]];
 
     function updateBoard(i, j, val) {
-        if (this.checkFull()) {
-            return false;
-        }
-
         if (val === "X") {
             board[i][j] = val;
         }
@@ -17,8 +13,6 @@ const gameBoard = (() => {
         else {
             throw new Error("Invalid value");
         }
-
-        return true;
     }
 
     function checkFull() {
@@ -89,15 +83,16 @@ const game = (() => {
         const i1 = Number(move1.split(" ")[0]);
         const j1 = Number(move1.split(" ")[1]);
 
-        if (!gameBoard.updateBoard(i1, j1, player1.symbol)) {
-            displayTie();
-            return true;
-        };
-
+        gameBoard.updateBoard(i1, j1, player1.symbol)
         gameBoard.displayBoard();
-        const winnerSymbol = gameBoard.checkwinner();
-        if (winnerSymbol === player1.symbol) {
+        const winnerSymbol1 = gameBoard.checkwinner();
+        if (winnerSymbol1 === player1.symbol) {
             displayWinner(player1);
+            return true;
+        }
+        
+        if (gameBoard.checkFull()) {
+            this.displayTie();
             return true;
         }
         
@@ -106,14 +101,16 @@ const game = (() => {
         const i2 = Number(move2.split(" ")[0]);
         const j2 = Number(move2.split(" ")[1]);
 
-        if (!gameBoard.updateBoard(i2, j2, player2.symbol)) {
-            displayTie();
+        gameBoard.updateBoard(i2, j2, player2.symbol)
+        gameBoard.displayBoard();
+        const winnerSymbol2 = gameBoard.checkwinner();
+        if (winnerSymbol2 === player2.symbol) {
+            displayWinner(player2);
             return true;
         }
 
-        gameBoard.displayBoard();
-        if (winnerSymbol === player2.symbol) {
-            displayWinner(player2);
+        if (gameBoard.checkFull()) {
+            this.displayTie();
             return true;
         }
 
@@ -128,10 +125,12 @@ const game = (() => {
         console.log("It's a tie");
     }
 
-    return { createPlayers, beginRound, displayWinner };
+    return { createPlayers, beginRound, displayWinner, displayTie };
 })();
 
 function start() {
     game.createPlayers();
     while (!game.beginRound());
 }
+
+start();
