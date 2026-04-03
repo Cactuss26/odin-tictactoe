@@ -115,12 +115,12 @@ const game = (() => {
         gameBoard.displayBoard();
 
         if (gameBoard.checkwinner()) {
-            this.displayWinner();
+            game.displayWinner();
             return true;
         }
         
         if (gameBoard.checkFull()) {
-            this.displayTie();
+            game.displayTie();
             return true;
         }
         
@@ -136,11 +136,13 @@ const game = (() => {
     }
 
     function displayWinner() {
-        console.log(`The winner is ${currentPlayer.name}`);
+        const dispDiv = document.querySelector(".winner");
+        dispDiv.textContent = `The winner is ${currentPlayer.name}!`;
     }
 
     function displayTie() {
-        console.log("It's a tie");
+        const dispDiv = document.querySelector(".winner");
+        dispDiv.textContent = "It's a tie";
     }
 
     return { createPlayers, playRound, displayWinner, displayTie };
