@@ -1,0 +1,33 @@
+* {
+    margin: 0;
+    padding: 0;
+    --side: 80vh;
+}
+
+body {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+.board {
+    border: 2px solid black;
+    width: var(--side);
+    height: var(--side);
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.square {
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 64px;
+}
+
+.square:hover {
+    background-color: rgb(208, 208, 208);
+}

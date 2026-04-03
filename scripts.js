@@ -1,24 +1,38 @@
 const gameBoard = (() => {
-    board = [[[" "], [" "], [" "]], [[" "], [" "], [" "]], [[" "], [" "], [" "]]];
+    let board = [[[""], [""], [""]], [[""], [""], [""]], [[""], [""], [""]]];
+    let currentPlayer;
 
-    function updateBoard(i, j, val) {
-        if (val === "X") {
-            board[i][j] = val;
+    function displayTurn() {
+        const turnDiv = document.querySelector(".turn");
+        turnDiv.textContent = `${currentPlayer.name}'s turn`;
+    }
+
+    function setBoard() {
+        const squares = document.querySelectorAll(".square");
+        for (let square of squares) {
+            square.addEventListener("click", game.playRound);
         }
+    }
 
-        else if (val === "O") {
-            board[i][j] = val;
+    function updateBoard(i, j) {
+        if (!currentPlayer) {
+            throw new Error("No player assigned");
         }
 
         else {
-            throw new Error("Invalid value");
+            board[i][j] = currentPlayer.symbol;
         }
     }
+
+    function setCurrentPlayer(player) {
+        currentPlayer = player;
+    } 
+
 
     function checkFull() {
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
-                if (board[i][j] == " ") {
+                if (board[i][j] == "") {
                     return false;
                 }
             }
@@ -28,36 +42,47 @@ const gameBoard = (() => {
     }
 
     function displayBoard() {
-        for (let i = 0; i < 3; i++) {
-            console.log(`${board[i][0]} ${board[i][1]} ${board[i][2]}`);
+        const squares = document.querySelectorAll(".square");
+        let i = 0;
+        let j = 0;
+
+        for (let square of squares) {
+            square.textContent = board[i][j];
+            if (j == 2) {
+                j = 0;
+                ++i;
+            }
+            else {
+                ++j;
+            }
         }
     }
 
     function checkwinner() {
         for (let i = 0; i < 3; i++) {
             if (board[i][0] === board[i][1] && board[i][1] === board[i][2]) {
-                return board[i][0];
+                return true;
             }
         }
 
         for (let j = 0; j < 3; j++) {
             if (board[0][j] === board[1][j] && board[1][j] === board[2][j]) {
-                return board[0][j];
+                return true;
             }
         }
 
         if (board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
-            return board[0][0];
+            return true;
         }
 
         if (board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
-            return board[0][2];
+            return true;
         }
 
-        return " ";
+        return false;
     }
 
-    return { updateBoard, displayBoard, checkwinner, checkFull };
+    return { updateBoard, displayBoard, checkwinner, checkFull, setCurrentPlayer, setBoard, displayTurn };
 })();
 
 const Player = (name, symbol) => {
@@ -67,27 +92,30 @@ const Player = (name, symbol) => {
 const game = (() => {
     let player1;
     let player2;
+    let currentPlayer;
 
     function createPlayers() {
         const name1 = prompt("Enter player 1's name");
         const name2 = prompt("Enter player 2's name");
         player1 = Player(name1, "X");
         player2 = Player(name2, "O");
+        currentPlayer = player1;
+        gameBoard.setCurrentPlayer(currentPlayer);
+        gameBoard.displayTurn();
     }
 
-    function beginRound() {
-        // One round includes both players' turns
-        // Player1's turn
+    function playRound(e) {
+        if (e.target.textContent != "") {
+            return false;
+        }
 
-        const move1 = prompt(`${player1.name}: Enter your move`);
-        const i1 = Number(move1.split(" ")[0]);
-        const j1 = Number(move1.split(" ")[1]);
-
-        gameBoard.updateBoard(i1, j1, player1.symbol)
+        let i = e.target.id[0];
+        let j = e.target.id[1];
+        gameBoard.updateBoard(i, j);
         gameBoard.displayBoard();
-        const winnerSymbol1 = gameBoard.checkwinner();
-        if (winnerSymbol1 === player1.symbol) {
-            displayWinner(player1);
+
+        if (gameBoard.checkwinner()) {
+            this.displayWinner();
             return true;
         }
         
@@ -96,41 +124,33 @@ const game = (() => {
             return true;
         }
         
-        // Player2's turn
-        const move2 = prompt(`${player2.name}: Enter your move`);
-        const i2 = Number(move2.split(" ")[0]);
-        const j2 = Number(move2.split(" ")[1]);
-
-        gameBoard.updateBoard(i2, j2, player2.symbol)
-        gameBoard.displayBoard();
-        const winnerSymbol2 = gameBoard.checkwinner();
-        if (winnerSymbol2 === player2.symbol) {
-            displayWinner(player2);
-            return true;
+        if (currentPlayer === player1) {
+            currentPlayer = player2;
         }
-
-        if (gameBoard.checkFull()) {
-            this.displayTie();
-            return true;
+        else {
+            currentPlayer = player1;
         }
-
+        gameBoard.setCurrentPlayer(currentPlayer);
+        gameBoard.displayTurn();
         return false;
     }
 
-    function displayWinner(winner) {
-        console.log(`The winner is ${winner.name}`);
+    function displayWinner() {
+        console.log(`The winner is ${currentPlayer.name}`);
     }
 
     function displayTie() {
         console.log("It's a tie");
     }
 
-    return { createPlayers, beginRound, displayWinner, displayTie };
+    return { createPlayers, playRound, displayWinner, displayTie };
 })();
 
 function start() {
+    gameBoard.setBoard();
     game.createPlayers();
-    while (!game.beginRound());
 }
 
-start();
+document.addEventListener("DOMContentLoaded",() => {
+    start();
+})
